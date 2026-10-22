@@ -1,4 +1,5 @@
-const PRODUCTS_API_URL = "https://dummyjson.com/products?limit=30";
+const PRODUCTS_API_URL =
+  import.meta.env.VITE_PRODUCTS_API_URL || "https://dummyjson.com/products?limit=30";
 
 export async function fetchProducts(signal) {
   const response = await fetch(PRODUCTS_API_URL, { signal });

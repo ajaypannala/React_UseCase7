@@ -19,6 +19,11 @@ npm run dev
 
 No backend is required.
 
+Vite loads `.env` automatically when the dev server starts. Configure the products
+endpoint with `VITE_PRODUCTS_API_URL`; see `.env.example` for the default value.
+Only put non-secret settings in `VITE_` variables because they are bundled into
+the client app.
+
 ## Features
 
 - Home page
