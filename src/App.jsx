@@ -11,6 +11,7 @@ import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import CustomerRoute from "./components/CustomerRoute";
 import { useProductStore } from "./stores/productStore";
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-      <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+      <Route path="/cart" element={<ProtectedRoute><CustomerRoute><Cart /></CustomerRoute></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
       <Route path="*" element={<NotFound />} />

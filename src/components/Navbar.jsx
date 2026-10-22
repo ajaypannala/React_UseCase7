@@ -15,12 +15,14 @@ function Navbar() {
         Products Cart
       </Link>
       <div className="flex items-center gap-3 sm:gap-5">
-        <Link
-          to="/cart"
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 sm:px-4"
-        >
-          Cart <span aria-label={`${cartCount} items`}>({cartCount})</span>
-        </Link>
+        {user?.role !== "admin" && (
+          <Link
+            to="/cart"
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 sm:px-4"
+          >
+            Cart <span aria-label={`${cartCount} items`}>({cartCount})</span>
+          </Link>
+        )}
         <span className="hidden text-sm font-medium text-slate-600 sm:block">{user?.name}</span>
         <button
           onClick={logout}

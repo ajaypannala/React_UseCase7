@@ -27,6 +27,12 @@ export const useProductStore = create(
         products: [...state.products, { ...product, id: Date.now(), image: null }]
       })),
 
+      updateProduct: (id, updates) => set((state) => ({
+        products: state.products.map((product) =>
+          product.id === id ? { ...product, ...updates } : product
+        )
+      })),
+
       deleteProduct: (id) => set((state) => ({
         products: state.products.filter((product) => product.id !== id)
       })),

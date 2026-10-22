@@ -9,6 +9,7 @@ function Products() {
   const isAdmin = user?.role === "admin";
   const products = useProductStore((state) => state.products);
   const addProduct = useProductStore((state) => state.addProduct);
+  const updateProduct = useProductStore((state) => state.updateProduct);
   const deleteProduct = useProductStore((state) => state.deleteProduct);
   const loading = useProductStore((state) => state.loading);
   const error = useProductStore((state) => state.error);
@@ -21,6 +22,8 @@ function Products() {
   const [categorySort, setCategorySort] = useState("");
   const [failedImages, setFailedImages] = useState({});
   const [form, setForm] = useState({ name: "", category: "", price: "", stock: "" });
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", category: "", price: "", stock: "" });
   const categories = [...new Set(products.map((product) => product.category))].sort((a, b) =>
     a.localeCompare(b)
   );
@@ -39,6 +42,17 @@ function Products() {
     });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
+
+  const startEditing = (product) => {
+    setEditingProductId(product.id);
+    setEditForm({
+      name: product.name,
+      category: product.category,
+      price: String(product.price),
+      stock: String(product.stock)
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -47,6 +61,19 @@ function Products() {
     addProduct({ name: form.name, category: form.category, price: Number(form.price), stock: Number(form.stock) });
     setForm({ name: "", category: "", price: "", stock: "" });
     setShowForm(false);
+  };
+
+  const handleUpdate = (e, productId) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+    if (!editForm.name.trim() || !editForm.category.trim() || !editForm.price || !editForm.stock) return;
+    updateProduct(productId, {
+      name: editForm.name.trim(),
+      category: editForm.category.trim(),
+      price: Number(editForm.price),
+      stock: Number(editForm.stock)
+    });
+    setEditingProductId(null);
   };
 
   return (
@@ -158,23 +185,95 @@ function Products() {
                       <p className="mt-1 text-lg font-semibold text-slate-900">{product.stock}</p>
                     </div>
                   </div>
-                  <div className="mt-auto flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => addToCart(product)}
-                      disabled={product.stock < 1 || (cart.find((item) => item.id === product.id)?.quantity ?? 0) >= product.stock}
-                      className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  {isAdmin && editingProductId === product.id && (
+                    <form
+                      onSubmit={(e) => handleUpdate(e, product.id)}
+                      className="mb-5 grid grid-cols-1 gap-3"
                     >
-                      {(cart.find((item) => item.id === product.id)?.quantity ?? 0) >= product.stock
-                        ? "Stock limit reached"
-                        : "Add to cart"}
-                    </button>
-                    {isAdmin && (
+                      <input
+                        name="name"
+                        aria-label="Product name"
+                        value={editForm.name}
+                        onChange={handleEditChange}
+                        required
+                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                      />
+                      <input
+                        name="category"
+                        aria-label="Product category"
+                        value={editForm.category}
+                        onChange={handleEditChange}
+                        required
+                        className="rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          name="price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          aria-label="Product price"
+                          value={editForm.price}
+                          onChange={handleEditChange}
+                          required
+                          className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        />
+                        <input
+                          name="stock"
+                          type="number"
+                          min="0"
+                          step="1"
+                          aria-label="Product stock"
+                          value={editForm.stock}
+                          onChange={handleEditChange}
+                          required
+                          className="min-w-0 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Save changes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingProductId(null)}
+                          className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                  <div className="mt-auto flex flex-wrap items-center gap-2">
+                    {!isAdmin && (
                       <button
-                        onClick={() => deleteProduct(product.id)}
-                        className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                        onClick={() => addToCart(product)}
+                        disabled={product.stock < 1 || (cart.find((item) => item.id === product.id)?.quantity ?? 0) >= product.stock}
+                        className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                       >
-                        Delete
+                        {(cart.find((item) => item.id === product.id)?.quantity ?? 0) >= product.stock
+                          ? "Stock limit reached"
+                          : "Add to cart"}
                       </button>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => startEditing(product)}
+                          className="rounded-lg border border-indigo-200 px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+                        >
+                          Modify
+                        </button>
+                        <button
+                          onClick={() => deleteProduct(product.id)}
+                          className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                        >
+                          Delete
+                        </button>
+                      </>
                     )}
                   </div>
                 </article>

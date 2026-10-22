@@ -18,7 +18,7 @@ function Sidebar() {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 md:grid-cols-1">
         <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
         <NavLink to="/products" className={linkClass}>Products</NavLink>
-        <NavLink to="/cart" className={linkClass}>Cart</NavLink>
+        {user?.role !== "admin" && <NavLink to="/cart" className={linkClass}>Cart</NavLink>}
         <NavLink to="/profile" className={linkClass}>Profile</NavLink>
         {user?.role === "admin" && <NavLink to="/users" className={linkClass}>Users</NavLink>}
       </div>
