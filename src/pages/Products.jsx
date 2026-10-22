@@ -6,6 +6,7 @@ import { useProductStore } from "../stores/productStore";
 
 function Products() {
   const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const products = useProductStore((state) => state.products);
   const addProduct = useProductStore((state) => state.addProduct);
   const deleteProduct = useProductStore((state) => state.deleteProduct);
@@ -41,6 +42,7 @@ function Products() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!form.name || !form.category || !form.price || !form.stock) return;
     addProduct({ name: form.name, category: form.category, price: Number(form.price), stock: Number(form.stock) });
     setForm({ name: "", category: "", price: "", stock: "" });
@@ -59,14 +61,16 @@ function Products() {
               <h1 className="text-3xl font-bold tracking-tight text-slate-900">Products</h1>
               <p className="mt-2 text-slate-500">Browse and manage your product catalog.</p>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="rounded-lg bg-indigo-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700"
-            >
-              {showForm ? "Close" : "Add Product"}
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="rounded-lg bg-indigo-600 px-5 py-2.5 font-semibold text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700"
+              >
+                {showForm ? "Close" : "Add Product"}
+              </button>
+            )}
           </div>
-          {showForm && (
+          {isAdmin && showForm && (
             <form onSubmit={handleSubmit} className="mb-8 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-4 sm:p-6">
               <input name="name" placeholder="Product Name" value={form.name} onChange={handleChange} className="rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
               <input name="category" placeholder="Category" value={form.category} onChange={handleChange} className="rounded-lg border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
@@ -164,7 +168,7 @@ function Products() {
                         ? "Stock limit reached"
                         : "Add to cart"}
                     </button>
-                    {user?.role === "admin" && (
+                    {isAdmin && (
                       <button
                         onClick={() => deleteProduct(product.id)}
                         className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
